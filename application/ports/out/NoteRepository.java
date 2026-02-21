@@ -3,44 +3,41 @@ package application.ports.out;
 import java.util.HashMap;
 import java.util.List;
 
-import application.ports.in.dto.CreateNoteDto;
 import application.ports.out.interfaces.NoteRepositoryInterface;
-import domain.Note;
+import domain.interfaces.NoteInterface;
 
 public class NoteRepository implements NoteRepositoryInterface {
-    private final HashMap<Integer, Note> notes = new HashMap<>();
+    private final HashMap<Integer, NoteInterface> notes = new HashMap<>();
 
      // beta
-     @Override
-     public void add(CreateNoteDto createNoteDto) {
-        if (createNoteDto != null) {
-            Note note = createNoteDto.toNote();
-            notes.put(note.getId(), note);
+    @Override
+    public void add(NoteInterface createNote) {
+        if (!notes.containsKey(createNote.getUidNote())) {
+            notes.put(createNote.getUidNote(), createNote);
         }
     }
 
-     @Override
-     public void update(Note note) {
-         // TODO Auto-generated method stub
-         
-     }
+    @Override
+    public void update(NoteInterface note) {
+        if (notes.containsKey(note.getUidNote())) {
+            notes.put(note.getUidNote(), note);
+        }
+    }
 
-     @Override
-     public void delete(int noteId) {
-         // TODO Auto-generated method stub
-         
-     }
+    @Override
+    public void delete(int noteId) {
+        notes.remove(noteId);
+    }
 
-     @Override
-     public Note findById(int noteId) {
-         // TODO Auto-generated method stub
-         return null;
-     }
+    @Override
+    public NoteInterface findById(int noteId) {
+        return notes.get(noteId);
+    }
 
-     @Override
-     public List<Note> findAll() {
-         // TODO Auto-generated method stub
-         return null;
-     }
+
+    @Override
+    public List<NoteInterface> findAll() {
+        return notes.values().stream().toList();
+    }
     
 }

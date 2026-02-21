@@ -2,16 +2,15 @@ package application.ports.out.interfaces;
 
 import java.util.List;
 
-import application.ports.in.dto.CreateNoteDto;
-import domain.Note;
+import domain.interfaces.NoteInterface;
 
 public interface NoteRepositoryInterface {// интерфейс адаптера
 
     // beta
-    public void add(CreateNoteDto note);
-    public void update(Note note);
+    public void add(NoteInterface note);
+    public void update(NoteInterface note);
     public void delete(int noteId);
-    public Note findById(int noteId);
-    public List<Note> findAll();
+    public NoteInterface findById(int noteId);
+    public List<NoteInterface> findAll();
 
 }
