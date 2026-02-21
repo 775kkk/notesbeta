@@ -3,12 +3,12 @@ package domain.interfaces;
 import java.util.List;
 
 public interface NoteInterface {
-    String getTextMain();
-    void setTitleName(String titleName);
-    int getUidNote();
-    String getTitleName();
-    void setTextMain(String textMain);
-    void setTagsList(List<TagsInterface> tagsList);
-    List<TagsInterface> getTagsList();
+    public String getTextMain();
+    public void setTitleName(String titleName);
+    public int getUidNote();
+    public String getTitleName();
+    public void setTextMain(String textMain);
+    public void setTagsList(List<TagsInterface> tagsList);
+    public List<TagsInterface> getTagsList();
 
 }

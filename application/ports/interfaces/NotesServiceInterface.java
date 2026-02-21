@@ -1,4 +1,4 @@
-package application.ports.in;
+package application.ports.interfaces;
 
 import java.util.List;
 
@@ -9,5 +9,8 @@ public interface NotesServiceInterface {// интерфейс сценариев
 
     //beta
     public NoteDto createNote(CreateNoteDto dto);
+    public void deleteNote(int noteId);
+    public void updateNote(NoteDto noteDto);
+    public NoteDto getNoteById(int noteId);
     public List<NoteDto> listNotes();
 }
