@@ -7,7 +7,7 @@ import domain.interfaces.NoteInterface;
 public interface NoteRepositoryInterface {// интерфейс адаптера
 
     // beta
-    public void add(NoteInterface note);
+    public NoteInterface save(NoteInterface note);
     public void update(NoteInterface note);
     public void delete(int noteId);
     public NoteInterface findById(int noteId);

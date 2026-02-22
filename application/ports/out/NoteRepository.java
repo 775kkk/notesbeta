@@ -11,32 +11,45 @@ public class NoteRepository implements NoteRepositoryInterface {
 
      // beta
     @Override
-    public void add(NoteInterface createNote) {
+    public NoteInterface save(NoteInterface createNote) throws {//TODO
         if (!notes.containsKey(createNote.getUidNote())) {
-            notes.put(createNote.getUidNote(), createNote);
+            return notes.put(createNote.getUidNote(), createNote);// put ошибку?
         }
+        throw new //TODO тут кастом ошибка что нота с таким id уже существует
     }
 
     @Override
-    public void update(NoteInterface note) {
+    public void update(NoteInterface note) throws {//TODO
         if (notes.containsKey(note.getUidNote())) {
-            notes.put(note.getUidNote(), note);
+            notes.put(note.getUidNote(), note);// put ошибку?
+            return;
+        }
+        throw new //TODO тут кастом ошибка неудачи метода
+    }
+
+    @Override
+    public void delete(int noteId) throws {//TODO
+        if (notes.containsKey(noteId)) {
+            notes.remove(noteId);// remove ошибку?
+        } else {
+            throw new //TODO кастом ошибка удаления несуществующей ноты
         }
     }
 
     @Override
-    public void delete(int noteId) {
-        notes.remove(noteId);
-    }
-
-    @Override
-    public NoteInterface findById(int noteId) {
-        return notes.get(noteId);
+    public NoteInterface findById(int noteId) throws {//TODO
+        if (notes.containsKey(noteId)) {
+            return notes.get(noteId);// get ошибку?
+        }
+        throw new //TODO кастом ошибка поиска несуществующей ноты
     }
 
 
     @Override
-    public List<NoteInterface> findAll() {
+    public List<NoteInterface> findAll() {// ошибку?
+        if (notes.isEmpty()) {
+            return List.of();
+        }
         return notes.values().stream().toList();
     }
     
