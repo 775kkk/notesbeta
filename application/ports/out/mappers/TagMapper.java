@@ -16,7 +16,7 @@ public class TagMapper {
         return new Tags(tagDto.tagName(), tagDto.uidTag());
     }
     public static TagsInterface toTag(CreateTagDto createTagDto) {
-        return new Tags(createTagDto.tagName());
+        return new Tags(createTagDto.tagName());// норм че обзываешься
     }
     public static List<TagDto> toTagDtoList(List<TagsInterface> tags) {
         return tags.stream().map(TagMapper::toTagDto).toList();
@@ -25,9 +25,7 @@ public class TagMapper {
         return tagDtos.stream().map(TagMapper::toTag).toList();
     }
     public static TagsInterface StringToTag(String tagName) {
-        // return new Tags(tagName);// долбаеб?
-        // return TagRepository.save(new Tags(tagName));// просто пиздец
-        // и как
+        return new Tags(tagName);
     }
     public static String toStringTag(TagsInterface tag) {
         return tag.getTagName();

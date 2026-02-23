@@ -4,13 +4,11 @@ import java.util.List;
 
 import domain.interfaces.TagsInterface;
 
-// import application.ports.in.dto.CreateTagDto;
-// import application.ports.in.dto.TagDto;
-
 public interface TagRepositoryInterface {
     public TagsInterface save(TagsInterface tag);
     public void update(TagsInterface tag);
     public void delete(int tagId);
     public TagsInterface findById(int tagId);
     public List<TagsInterface> findAll();
+    public TagsInterface findByName(String name);
 }

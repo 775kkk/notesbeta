@@ -11,11 +11,15 @@ import domain.interfaces.TagsInterface;
 
 public class TagRepository implements TagRepositoryInterface {
     private final HashMap<Integer, TagsInterface> tags = new LinkedHashMap<>();
+    private final HashMap<String, Integer> NameToId = new HashMap<>();
+
+     // beta
 
     @Override
     public TagsInterface save(TagsInterface tag) throws DuplicateTagException{
         if (!tags.containsKey(tag.getUidTag())) {
             tags.put(tag.getUidTag(), tag);
+            NameToId.put(tag.getTagName(), tag.getUidTag());
             return tag;
         }
         throw new DuplicateTagException("Tag with ID " + tag.getUidTag() + " already exists");
@@ -24,6 +28,8 @@ public class TagRepository implements TagRepositoryInterface {
     @Override
     public void update(TagsInterface tag) throws TagNotFoundException {
         if (tags.containsKey(tag.getUidTag())) {
+            NameToId.remove(tags.get(tag.getUidTag()).getTagName());
+            NameToId.put(tag.getTagName(), tag.getUidTag());
             tags.put(tag.getUidTag(), tag);
             return;
         }//TODO СДЕЛАТЬ УМНЫЙ АПДЕЙТ
@@ -31,10 +37,11 @@ public class TagRepository implements TagRepositoryInterface {
     }
 
     @Override
-    public void delete(int tagId) throws TagNotFoundException{
+    public void delete(int tagId) throws TagNotFoundException{// 2 делита разных один идшный другой по имени
         if (!tags.containsKey(tagId)) {
             throw new TagNotFoundException("Failed to delete tag with ID " + tagId);
         }
+        NameToId.remove(tags.get(tagId).getTagName());// TODO  точно в отдельный метод и там исключение
         tags.remove(tagId);
     }
 
@@ -44,6 +51,13 @@ public class TagRepository implements TagRepositoryInterface {
             throw new TagNotFoundException("Failed to find tag with ID " + tagId);
         }
         return tags.get(tagId);
+    }
+
+    public TagsInterface findByName(String tagName) throws TagNotFoundException {
+        if (!NameToId.containsKey(tagName)) {
+            throw new TagNotFoundException("Failed to find tag with name " + tagName);
+        }
+        return tags.get(NameToId.get(tagName));
     }
 
     @Override

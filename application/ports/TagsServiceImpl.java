@@ -7,8 +7,10 @@ import application.exceptions.TagNotFoundException;
 import application.ports.in.dto.CreateTagDto;
 import application.ports.in.dto.TagDto;
 import application.ports.interfaces.TagsServiceInterface;
+import application.ports.out.TagRepository;
 import application.ports.out.interfaces.TagRepositoryInterface;
 import application.ports.out.mappers.TagMapper;
+import domain.interfaces.TagsInterface;
 
 public class TagsServiceImpl implements TagsServiceInterface{
     
@@ -45,5 +47,7 @@ public class TagsServiceImpl implements TagsServiceInterface{
     public List<TagDto> listTags(){// вроде нет ошибок тестани
         return tagRepository.findAll().stream().map(TagMapper::toTagDto).toList();
     }
+
+    
 
 }
