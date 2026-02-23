@@ -25,7 +25,9 @@ public class TagMapper {
         return tagDtos.stream().map(TagMapper::toTag).toList();
     }
     public static TagsInterface StringToTag(String tagName) {
-        return new Tags(tagName);
+        // return new Tags(tagName);// долбаеб?
+        // return TagRepository.save(new Tags(tagName));// просто пиздец
+        // и как
     }
     public static String toStringTag(TagsInterface tag) {
         return tag.getTagName();

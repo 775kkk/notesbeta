@@ -1,47 +1,52 @@
 package application.ports.out;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import application.exceptions.DuplicateNoteException;
+import application.exceptions.NoteNotFoundException;
 import application.ports.out.interfaces.NoteRepositoryInterface;
 import domain.interfaces.NoteInterface;
 
 public class NoteRepository implements NoteRepositoryInterface {
-    private final HashMap<Integer, NoteInterface> notes = new HashMap<>();
+    private final HashMap<Integer, NoteInterface> notes = new LinkedHashMap<>();
 
      // beta
     @Override
-    public NoteInterface save(NoteInterface createNote) throws {//TODO
+    public NoteInterface save(NoteInterface createNote) throws DuplicateNoteException {
         if (!notes.containsKey(createNote.getUidNote())) {
-            return notes.put(createNote.getUidNote(), createNote);// put ошибку?
+            notes.put(createNote.getUidNote(), createNote);
+            return createNote;
         }
-        throw new //TODO тут кастом ошибка что нота с таким id уже существует
+        throw new DuplicateNoteException("Note with ID " + createNote.getUidNote() + " already exists");
     }
 
     @Override
-    public void update(NoteInterface note) throws {//TODO
+    public void update(NoteInterface note) throws NoteNotFoundException{
         if (notes.containsKey(note.getUidNote())) {
             notes.put(note.getUidNote(), note);// put ошибку?
             return;
-        }
-        throw new //TODO тут кастом ошибка неудачи метода
+        }//TODO СДЕЛАТЬ УМНЫЙ АПДЕЙТ
+        throw new NoteNotFoundException("Failed to update note with ID " + note.getUidNote());
+
     }
 
     @Override
-    public void delete(int noteId) throws {//TODO
+    public void delete(int noteId) throws NoteNotFoundException {
         if (notes.containsKey(noteId)) {
             notes.remove(noteId);// remove ошибку?
         } else {
-            throw new //TODO кастом ошибка удаления несуществующей ноты
+            throw new NoteNotFoundException("Failed to delete note with ID " + noteId);
         }
     }
 
     @Override
-    public NoteInterface findById(int noteId) throws {//TODO
+    public NoteInterface findById(int noteId) throws NoteNotFoundException {
         if (notes.containsKey(noteId)) {
             return notes.get(noteId);// get ошибку?
         }
-        throw new //TODO кастом ошибка поиска несуществующей ноты
+        throw new NoteNotFoundException("Failed to find note with ID " + noteId);
     }
 
 

@@ -2,6 +2,8 @@ package application.ports;
 
 import java.util.List;
 
+import application.exceptions.DuplicateTagException;
+import application.exceptions.TagNotFoundException;
 import application.ports.in.dto.CreateTagDto;
 import application.ports.in.dto.TagDto;
 import application.ports.interfaces.TagsServiceInterface;
@@ -20,22 +22,22 @@ public class TagsServiceImpl implements TagsServiceInterface{
     //========================TAG========================
 
     @Override
-    public TagDto createTag(CreateTagDto dto) throws {// TODO кастом ошибка если тэг с таким id есть
+    public TagDto createTag(CreateTagDto dto) throws DuplicateTagException{// TODO кастом ошибка если тэг с таким id есть
         return TagMapper.toTagDto(tagRepository.save(TagMapper.toTag(dto)));
     }
 
     @Override
-    public void deleteTag(int tagId) throws {// TODO кастом ошибка удаления
+    public void deleteTag(int tagId) throws TagNotFoundException {// TODO кастом ошибка удаления
         tagRepository.delete(tagId);
     }
 
     @Override
-    public void updateTag(TagDto tagDto) throws {// TODO кастом ошибка обновления
+    public void updateTag(TagDto tagDto) throws TagNotFoundException {// TODO кастом ошибка обновления
         tagRepository.update(TagMapper.toTag(tagDto));
     }
 
     @Override
-    public TagDto getTagById(int tagId) throws {// TODO кастом ошибка поиска
+    public TagDto getTagById(int tagId) throws TagNotFoundException {// TODO кастом ошибка поиска
         return TagMapper.toTagDto(tagRepository.findById(tagId));
     }
 

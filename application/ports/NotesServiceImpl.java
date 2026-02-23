@@ -2,13 +2,13 @@ package application.ports;
 
 import java.util.List;
 
+import application.exceptions.DuplicateNoteException;
+import application.exceptions.NoteNotFoundException;
 import application.ports.in.dto.CreateNoteDto;
 import application.ports.in.dto.NoteDto;
 import application.ports.interfaces.NotesServiceInterface;
 import application.ports.out.interfaces.NoteRepositoryInterface;
-import application.ports.out.interfaces.TagRepositoryInterface;
 import application.ports.out.mappers.NoteMapper;
-import domain.interfaces.TagsInterface;
 
 public class NotesServiceImpl implements NotesServiceInterface {
     private final NoteRepositoryInterface noteRepository;
@@ -19,23 +19,22 @@ public class NotesServiceImpl implements NotesServiceInterface {
 
 //========================NOTE========================
     @Override
-    public NoteDto createNote(CreateNoteDto dto) throws{// TODO кастом ошибка если нота с таким id есть
+    public NoteDto createNote(CreateNoteDto dto) throws DuplicateNoteException{// TODO кастом ошибка если нота с таким id есть
         return NoteMapper.toNoteDto(noteRepository.save(NoteMapper.toNote(dto)));
     }
 
     @Override
-    public void deleteNote(int noteId) throws{// TODO кастом ошибка удаления
-        //TODO 
+    public void deleteNote(int noteId) throws NoteNotFoundException{// TODO кастом ошибка удаления
         noteRepository.delete(noteId);
     }
 
     @Override
-    public void updateNote(NoteDto noteDto) throws{// TODO кастом ошибка обновления
+    public void updateNote(NoteDto noteDto) throws NoteNotFoundException{// TODO кастом ошибка обновления
         noteRepository.update(NoteMapper.toNote(noteDto));
     }
 
     @Override
-    public NoteDto getNoteById(int noteId) throws{// TODO кастом ошибка поиска
+    public NoteDto getNoteById(int noteId) throws NoteNotFoundException{// TODO кастом ошибка поиска
         return NoteMapper.toNoteDto(noteRepository.findById(noteId));
     }
 

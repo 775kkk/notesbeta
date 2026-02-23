@@ -19,7 +19,9 @@ public class NoteMapper {
         NoteInterface note = new Note(noteDto.title(), noteDto.content(), noteDto.noteId(), List.of());
         // списк тегов из строк в TagsInterface
         if (noteDto.tags()!=null) {
-            note.setTagsList(noteDto.tags().stream().map(x -> TagMapper.StringToTag(x)).toList());
+            // note.setTagsList(noteDto.tags().stream().map(x -> TagMapper.StringToTag(x)).toList());
+            // Tags через TagsServiceInterface или нет?
+            // StringToTag(x) должен быть в TagInterface?
         }
         return note;
     }
@@ -28,8 +30,10 @@ public class NoteMapper {
         NoteInterface note = new Note(createNoteDto.title(), createNoteDto.content(), List.of());
         // списк тегов из строк в TagsInterface
         if (createNoteDto.tags()!=null) {
-            note.setTagsList(createNoteDto.tags().stream().map(x -> TagMapper.StringToTag(x)).toList());
+            // note.setTagsList(createNoteDto.tags().stream().map(x -> TagMapper.StringToTag(x)).toList());
+            // Tags через TagsServiceInterface или нет?
         }
         return note;
     }
+
 }
