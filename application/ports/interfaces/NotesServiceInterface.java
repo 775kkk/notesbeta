@@ -5,7 +5,7 @@ import java.util.List;
 import application.ports.in.dto.CreateNoteDto;
 import application.ports.in.dto.NoteDto;
 
-public interface NotesServiceInterface {// интерфейс сценариев
+public interface NotesServiceInterface {// интерфейс заметок
 
     //beta
     public NoteDto createNote(CreateNoteDto dto);

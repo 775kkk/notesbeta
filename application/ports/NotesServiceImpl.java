@@ -12,11 +12,9 @@ import domain.interfaces.TagsInterface;
 
 public class NotesServiceImpl implements NotesServiceInterface {
     private final NoteRepositoryInterface noteRepository;
-    private final TagRepositoryInterface tagRepository;
     
-    public NotesServiceImpl(NoteRepositoryInterface noteRepository, TagRepositoryInterface tagRepository) {
+    public NotesServiceImpl(NoteRepositoryInterface noteRepository) {
         this.noteRepository = noteRepository;
-        this.tagRepository = tagRepository;
     }
 
 //========================NOTE========================
