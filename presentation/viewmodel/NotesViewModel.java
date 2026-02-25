@@ -11,6 +11,8 @@ import application.ports.in.dto.NoteDto;
 import application.ports.interfaces.NotesServiceInterface;
 
 public class NotesViewModel {
+    public static final String ALL_CATEGORIES = "All";
+
     public enum Mode {
         LIST,
         DETAIL
@@ -33,6 +35,8 @@ public class NotesViewModel {
     // сообщения для фронт фор юзер
     private String statusMessage;
     private String errorMessage;
+    private String titleFilter = "";
+    private String categoryFilter = ALL_CATEGORIES;
 
     public NotesViewModel(NotesServiceInterface notesService) {
         this.notesService = notesService;
@@ -43,6 +47,7 @@ public class NotesViewModel {
         clearMessages();
         try {
             this.notesList = new ArrayList<>(notesService.listNotes());
+            ensureValidCategoryFilter();
         } catch (AppException e) {
             this.errorMessage = e.getMessage();
         }
@@ -226,6 +231,16 @@ public class NotesViewModel {
 
     private void refreshNotesListSilently() {
         this.notesList = new ArrayList<>(notesService.listNotes());
+        ensureValidCategoryFilter();
+    }
+
+    private void ensureValidCategoryFilter() {
+        if (ALL_CATEGORIES.equals(this.categoryFilter)) {
+            return;
+        }
+        if (!getAvailableCategories().contains(this.categoryFilter)) {
+            this.categoryFilter = ALL_CATEGORIES;
+        }
     }
 
     private String normalizeTitle(String value) {
@@ -263,6 +278,66 @@ public class NotesViewModel {
         return new ArrayList<>(notesList);
     }
 
+    public List<NoteDto> getFilteredNotesList() {
+        return notesList.stream()
+                .filter(this::matchesTitleFilter)
+                .filter(this::matchesCategoryFilter)
+                .toList();
+    }
+
+    public List<String> getAvailableCategories() {
+        LinkedHashSet<String> categories = new LinkedHashSet<>();
+        categories.add(ALL_CATEGORIES);
+
+        for (NoteDto note : this.notesList) {
+            if (note.tags() == null) {
+                continue;
+            }
+            for (String tag : note.tags()) {
+                if (tag == null) {
+                    continue;
+                }
+                String normalized = tag.trim();
+                if (!normalized.isEmpty()) {
+                    categories.add(normalized);
+                }
+            }
+        }
+
+        return new ArrayList<>(categories);
+    }
+
+    public void changeTitleFilter(String newFilter) {
+        this.titleFilter = newFilter == null ? "" : newFilter;
+    }
+
+    public void changeCategoryFilter(String newCategory) {
+        if (newCategory == null || newCategory.isBlank()) {
+            this.categoryFilter = ALL_CATEGORIES;
+            return;
+        }
+        this.categoryFilter = newCategory;
+        ensureValidCategoryFilter();
+    }
+
+    private boolean matchesTitleFilter(NoteDto note) {
+        if (this.titleFilter == null || this.titleFilter.isBlank()) {
+            return true;
+        }
+        String title = note.title() == null ? "" : note.title();
+        return title.toLowerCase().contains(this.titleFilter.toLowerCase().trim());
+    }
+
+    private boolean matchesCategoryFilter(NoteDto note) {
+        if (ALL_CATEGORIES.equals(this.categoryFilter)) {
+            return true;
+        }
+        if (note.tags() == null || note.tags().isEmpty()) {
+            return false;
+        }
+        return note.tags().stream().anyMatch(tag -> this.categoryFilter.equals(tag));
+    }
+
     public Integer getSelectedNoteId() {
         return selectedNoteId;
     }
@@ -293,5 +368,13 @@ public class NotesViewModel {
 
     public String getErrorMessage() {
         return errorMessage;
+    }
+
+    public String getTitleFilter() {
+        return titleFilter;
+    }
+
+    public String getCategoryFilter() {
+        return categoryFilter;
     }
 }

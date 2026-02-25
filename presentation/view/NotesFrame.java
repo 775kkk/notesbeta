@@ -1,30 +1,27 @@
 package presentation.view;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -32,41 +29,29 @@ import application.ports.in.dto.NoteDto;
 import presentation.viewmodel.NotesViewModel;
 
 public class NotesFrame extends JFrame {
-    private static final String CARD_LIST = "LIST";
-    private static final String CARD_DETAIL = "DETAIL";
-
     private final NotesViewModel viewModel;
 
-    private final CardLayout cardLayout = new CardLayout();
-    private final JPanel cardPanel = new JPanel(cardLayout);
-    private final JLabel messageLabel = new JLabel(" ");
-
-    // LIST card
     private final DefaultListModel<NoteDto> listModel = new DefaultListModel<>();
     private final JList<NoteDto> notesList = new JList<>(listModel);
+
     private final JButton refreshButton = new JButton("Refresh");
     private final JButton newButton = new JButton("New");
     private final JButton openButton = new JButton("Open");
-    private final JButton deleteFromListButton = new JButton("Delete");
+    private final JButton deleteButton = new JButton("Delete");
 
-    // DETAIL card
-    private final JButton backButton = new JButton("Back");
-    private final JButton saveButton = new JButton("Save");
-    private final JButton deleteFromDetailButton = new JButton("Delete");
-    private final JLabel detailHeaderLabel = new JLabel("Note");
-    private final JTextField titleField = new JTextField();
-    private final JTextField tagsField = new JTextField();
-    private final JTextArea contentArea = new JTextArea();
+    private final JTextField titleFilterField = new JTextField();
+    private final JComboBox<String> categoryCombo = new JComboBox<>();
+    private final JLabel messageLabel = new JLabel(" ");
 
     private boolean updatingView;
 
     public NotesFrame(NotesViewModel viewModel) {
         this.viewModel = viewModel;
 
-        setTitle("Notes (MVP)");
+        setTitle("Notes - List");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(900, 600));
-        setSize(1000, 700);
+        setMinimumSize(new Dimension(700, 500));
+        setSize(900, 650);
         setLocationRelativeTo(null);
 
         buildUi();
@@ -80,30 +65,32 @@ public class NotesFrame extends JFrame {
         setLayout(new BorderLayout(8, 8));
         ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
-        cardPanel.add(buildListCard(), CARD_LIST);
-        cardPanel.add(buildDetailCard(), CARD_DETAIL);
-        add(cardPanel, BorderLayout.CENTER);
-
-        messageLabel.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
-        add(messageLabel, BorderLayout.SOUTH);
-    }
-
-    private JPanel buildListCard() {
-        JPanel panel = new JPanel(new BorderLayout(8, 8));
-
-        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        topBar.add(refreshButton);
-        topBar.add(newButton);
-        topBar.add(openButton);
-        topBar.add(deleteFromListButton);
+        JPanel top = new JPanel(new BorderLayout(0, 8));
 
         JLabel title = new JLabel("Notes");
         title.setFont(title.getFont().deriveFont(Font.BOLD, 18f));
-        title.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
+        top.add(title, BorderLayout.NORTH);
 
-        JPanel north = new JPanel(new BorderLayout(0, 6));
-        north.add(title, BorderLayout.NORTH);
-        north.add(topBar, BorderLayout.CENTER);
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        actions.add(refreshButton);
+        actions.add(newButton);
+        actions.add(openButton);
+        actions.add(deleteButton);
+
+        JPanel filters = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        titleFilterField.setColumns(20);
+        titleFilterField.setBorder(BorderFactory.createTitledBorder("Title filter"));
+
+        categoryCombo.setPreferredSize(new Dimension(180, 48));
+        categoryCombo.setBorder(BorderFactory.createTitledBorder("Category"));
+
+        filters.add(titleFilterField);
+        filters.add(categoryCombo);
+
+        JPanel controls = new JPanel(new BorderLayout(0, 6));
+        controls.add(actions, BorderLayout.NORTH);
+        controls.add(filters, BorderLayout.CENTER);
+        top.add(controls, BorderLayout.CENTER);
 
         notesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         notesList.setCellRenderer(new DefaultListCellRenderer() {
@@ -114,55 +101,21 @@ public class NotesFrame extends JFrame {
                 if (value instanceof NoteDto note) {
                     String titleText = note.title() == null || note.title().isBlank() ? "(untitled)" : note.title();
                     String preview = note.content() == null ? "" : note.content().replace('\n', ' ');
-                    if (preview.length() > 40) {
-                        preview = preview.substring(0, 40) + "...";
+                    if (preview.length() > 60) {
+                        preview = preview.substring(0, 60) + "...";
                     }
-                    c.setText("#" + note.noteId() + "  " + titleText + (preview.isBlank() ? "" : " | " + preview));
+                    String tags = (note.tags() == null || note.tags().isEmpty()) ? "" : "  [" + String.join(", ", note.tags()) + "]";
+                    c.setText("#" + note.noteId() + "  " + titleText + (preview.isBlank() ? "" : " | " + preview) + tags);
                 }
                 return c;
             }
         });
 
-        panel.add(north, BorderLayout.NORTH);
-        panel.add(new JScrollPane(notesList), BorderLayout.CENTER);
-        return panel;
-    }
+        add(top, BorderLayout.NORTH);
+        add(new JScrollPane(notesList), BorderLayout.CENTER);
 
-    private JPanel buildDetailCard() {
-        JPanel panel = new JPanel(new BorderLayout(8, 8));
-
-        JPanel topBar = new JPanel(new BorderLayout(8, 0));
-        JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        leftButtons.add(backButton);
-
-        JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        rightButtons.add(saveButton);
-        rightButtons.add(deleteFromDetailButton);
-
-        topBar.add(leftButtons, BorderLayout.WEST);
-        topBar.add(detailHeaderLabel, BorderLayout.CENTER);
-        topBar.add(rightButtons, BorderLayout.EAST);
-
-        JPanel form = new JPanel(new BorderLayout(8, 8));
-        JPanel fields = new JPanel(new BorderLayout(0, 6));
-
-        titleField.setBorder(BorderFactory.createTitledBorder("Title"));
-        tagsField.setBorder(BorderFactory.createTitledBorder("Tags (comma separated)"));
-
-        fields.add(titleField, BorderLayout.NORTH);
-        fields.add(tagsField, BorderLayout.CENTER);
-
-        contentArea.setLineWrap(true);
-        contentArea.setWrapStyleWord(true);
-        JScrollPane contentScroll = new JScrollPane(contentArea);
-        contentScroll.setBorder(BorderFactory.createTitledBorder("Content"));
-
-        form.add(fields, BorderLayout.NORTH);
-        form.add(contentScroll, BorderLayout.CENTER);
-
-        panel.add(topBar, BorderLayout.NORTH);
-        panel.add(form, BorderLayout.CENTER);
-        return panel;
+        messageLabel.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
+        add(messageLabel, BorderLayout.SOUTH);
     }
 
     private void wireListeners() {
@@ -174,11 +127,12 @@ public class NotesFrame extends JFrame {
         newButton.addActionListener(e -> {
             viewModel.startCreateNote();
             refreshFromViewModel();
+            openEditorDialog();
         });
 
         openButton.addActionListener(e -> openSelectedNote());
 
-        deleteFromListButton.addActionListener(e -> {
+        deleteButton.addActionListener(e -> {
             NoteDto selected = notesList.getSelectedValue();
             if (selected == null) {
                 return;
@@ -198,65 +152,49 @@ public class NotesFrame extends JFrame {
 
         notesList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                refreshButtonsOnly();
+                refreshButtonsAndMessages();
             }
         });
 
-        backButton.addActionListener(e -> {
-            syncDraftToViewModel();
-            viewModel.back();
-            refreshFromViewModel();
-        });
-
-        saveButton.addActionListener(e -> {
-            syncDraftToViewModel();
-            viewModel.save();
-            refreshFromViewModel();
-        });
-
-        deleteFromDetailButton.addActionListener(e -> {
-            Integer id = viewModel.getSelectedNoteId();
-            if (id == null) {
-                return;
-            }
-            viewModel.deleteNote(id);
-            refreshFromViewModel();
-        });
-
-        attachDraftFieldListeners();
-    }
-
-    private void attachDraftFieldListeners() {
-        DocumentListener listener = new DocumentListener() {
+        titleFilterField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                onDraftFieldChanged();
+                onFilterChanged();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                onDraftFieldChanged();
+                onFilterChanged();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                onDraftFieldChanged();
+                onFilterChanged();
             }
-        };
+        });
 
-        titleField.getDocument().addDocumentListener(listener);
-        tagsField.getDocument().addDocumentListener(listener);
-        contentArea.getDocument().addDocumentListener(listener);
+        categoryCombo.addActionListener(e -> {
+            if (updatingView) {
+                return;
+            }
+            Object selected = categoryCombo.getSelectedItem();
+            viewModel.changeCategoryFilter(selected == null ? null : selected.toString());
+            refreshFromViewModel();
+        });
     }
 
-    private void onDraftFieldChanged() {
+    private void onFilterChanged() {
         if (updatingView) {
             return;
         }
-
-        syncDraftToViewModel();
-        refreshButtonsOnly();
-        refreshDetailHeaderOnly();
+        viewModel.changeTitleFilter(titleFilterField.getText());
+        updatingView = true;
+        try {
+            refreshList();
+            refreshButtonsAndMessages();
+        } finally {
+            updatingView = false;
+        }
     }
 
     private void openSelectedNote() {
@@ -266,55 +204,53 @@ public class NotesFrame extends JFrame {
         }
         viewModel.openNote(selected.noteId());
         refreshFromViewModel();
+
+        if (viewModel.getErrorMessage() == null) {
+            openEditorDialog();
+        }
     }
 
-    private void syncDraftToViewModel() {
-        if (viewModel.getMode() != NotesViewModel.Mode.DETAIL) {
-            return;
-        }
-        viewModel.changeTitle(titleField.getText());
-        viewModel.changeContent(contentArea.getText());
-        viewModel.changeTags(parseTags(tagsField.getText()));
+    private void openEditorDialog() {
+        NoteEditorDialog dialog = new NoteEditorDialog(this, viewModel);
+        dialog.setVisible(true);
+        refreshFromViewModel();
     }
 
     private void refreshFromViewModel() {
         updatingView = true;
         try {
-            refreshListData();
-
-            if (viewModel.getMode() == NotesViewModel.Mode.DETAIL) {
-                cardLayout.show(cardPanel, CARD_DETAIL);
-                titleField.setText(viewModel.getDraftTitle());
-                contentArea.setText(viewModel.getDraftContent());
-                tagsField.setText(formatTags(viewModel.getDraftTags()));
-                contentArea.setCaretPosition(0);
-            } else {
-                cardLayout.show(cardPanel, CARD_LIST);
-            }
-
-            refreshDetailHeaderOnly();
-            refreshMessageBar();
-            refreshButtonsOnly();
+            refreshFilters();
+            refreshList();
+            refreshButtonsAndMessages();
         } finally {
             updatingView = false;
         }
     }
 
-    private void refreshListData() {
-        List<NoteDto> notes = viewModel.getNotesList();
-        Integer selectedId = viewModel.getSelectedNoteId();
-        NoteDto currentlySelectedInList = notesList.getSelectedValue();
-        Integer listSelectedId = currentlySelectedInList == null ? null : currentlySelectedInList.noteId();
+    private void refreshFilters() {
+        String vmTitleFilter = viewModel.getTitleFilter();
+        if (!titleFilterField.getText().equals(vmTitleFilter)) {
+            titleFilterField.setText(vmTitleFilter);
+        }
+
+        List<String> categories = viewModel.getAvailableCategories();
+        String selectedCategory = viewModel.getCategoryFilter();
+        categoryCombo.setModel(new DefaultComboBoxModel<>(categories.toArray(String[]::new)));
+        categoryCombo.setSelectedItem(selectedCategory);
+    }
+
+    private void refreshList() {
+        Integer currentSelection = notesList.getSelectedValue() == null ? null : notesList.getSelectedValue().noteId();
+        List<NoteDto> visibleNotes = viewModel.getFilteredNotesList();
 
         listModel.clear();
-        for (NoteDto note : notes) {
+        for (NoteDto note : visibleNotes) {
             listModel.addElement(note);
         }
 
-        Integer targetId = selectedId != null ? selectedId : listSelectedId;
-        if (targetId != null) {
+        if (currentSelection != null) {
             for (int i = 0; i < listModel.size(); i++) {
-                if (listModel.get(i).noteId() == targetId) {
+                if (listModel.get(i).noteId() == currentSelection) {
                     notesList.setSelectedIndex(i);
                     notesList.ensureIndexIsVisible(i);
                     break;
@@ -323,31 +259,11 @@ public class NotesFrame extends JFrame {
         }
     }
 
-    private void refreshButtonsOnly() {
-        boolean inDetail = viewModel.getMode() == NotesViewModel.Mode.DETAIL;
-        boolean hasSelectedInList = notesList.getSelectedValue() != null;
+    private void refreshButtonsAndMessages() {
+        boolean hasSelection = notesList.getSelectedValue() != null;
+        openButton.setEnabled(hasSelection);
+        deleteButton.setEnabled(hasSelection);
 
-        openButton.setEnabled(!inDetail && hasSelectedInList);
-        deleteFromListButton.setEnabled(!inDetail && hasSelectedInList);
-
-        backButton.setEnabled(inDetail);
-        saveButton.setEnabled(inDetail);
-        deleteFromDetailButton.setEnabled(inDetail && viewModel.getSelectedNoteId() != null);
-    }
-
-    private void refreshDetailHeaderOnly() {
-        if (viewModel.getMode() != NotesViewModel.Mode.DETAIL) {
-            detailHeaderLabel.setText("Note");
-            return;
-        }
-
-        String idText = viewModel.getSelectedNoteId() == null ? "new" : String.valueOf(viewModel.getSelectedNoteId());
-        String dirtyMark = viewModel.isDirty() ? " *" : "";
-        detailHeaderLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        detailHeaderLabel.setText("Note #" + idText + dirtyMark);
-    }
-
-    private void refreshMessageBar() {
         if (viewModel.getErrorMessage() != null && !viewModel.getErrorMessage().isBlank()) {
             messageLabel.setForeground(new Color(180, 30, 30));
             messageLabel.setText(viewModel.getErrorMessage());
@@ -362,22 +278,5 @@ public class NotesFrame extends JFrame {
 
         messageLabel.setForeground(Color.DARK_GRAY);
         messageLabel.setText(" ");
-    }
-
-    private List<String> parseTags(String text) {
-        if (text == null || text.isBlank()) {
-            return new ArrayList<>();
-        }
-        return Arrays.stream(text.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .toList();
-    }
-
-    private String formatTags(List<String> tags) {
-        if (tags == null || tags.isEmpty()) {
-            return "";
-        }
-        return String.join(", ", tags);
     }
 }
